@@ -1,0 +1,621 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Nunito:wght@300;400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; }
+
+  #phone {
+    width: 340px;
+    min-height: 680px;
+    background: #0a0a0a;
+    border-radius: 40px;
+    border: 2px solid #222;
+    margin: 1.5rem auto;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 0 0 4px #111, 0 30px 80px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NOTCH */
+  .notch {
+    width: 120px; height: 26px;
+    background: #0a0a0a;
+    border-radius: 0 0 18px 18px;
+    margin: 0 auto;
+    position: relative; z-index: 10;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 18px 0;
+    font-size: 11px; color: #888;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* SCREEN VIEWS */
+  .screen { display: none; flex: 1; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── LOCK SCREEN ── */
+  #lock-screen {
+    background: linear-gradient(160deg, #0d0d1a 0%, #0a0a0a 60%, #0d0a0a 100%);
+    align-items: center;
+    padding: 0 0 2rem;
+  }
+
+  .lock-time {
+    font-size: 72px; font-weight: 300; color: #e8e8e8;
+    letter-spacing: -3px; margin-top: 2rem;
+    font-family: 'Nunito', sans-serif;
+  }
+  .lock-date {
+    font-size: 14px; color: #666; letter-spacing: 1px;
+    margin-bottom: 2.5rem; text-transform: uppercase;
+  }
+
+  .lock-notif {
+    width: 88%; background: rgba(255,255,255,0.05);
+    border: 0.5px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .notif-icon { font-size: 22px; }
+  .notif-text { flex: 1; }
+  .notif-app { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+  .notif-msg { font-size: 13px; color: #c0c0c0; margin-top: 1px; }
+  .notif-time { font-size: 11px; color: #444; }
+
+  /* KEYPAD SCREEN */
+  #keypad-screen {
+    background: #0a0a0a;
+    align-items: center;
+    padding-bottom: 2rem;
+  }
+
+  .keypad-prompt {
+    font-size: 13px; color: #555; letter-spacing: 2px;
+    text-transform: uppercase; margin-top: 2rem; margin-bottom: 1.2rem;
+  }
+  .keypad-dots {
+    display: flex; gap: 18px; margin-bottom: 2rem;
+  }
+  .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid #333; background: transparent;
+    transition: all 0.15s;
+  }
+  .dot.filled { background: #e0e0e0; border-color: #e0e0e0; }
+  .dot.error { background: #c0392b; border-color: #c0392b; }
+
+  .keypad-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; width: 260px;
+  }
+  .key {
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 50%; width: 72px; height: 72px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.1s;
+    user-select: none;
+  }
+  .key:active, .key.pressed { background: rgba(255,255,255,0.18); transform: scale(0.94); }
+  .key-num { font-size: 26px; color: #ddd; font-weight: 300; line-height: 1; }
+  .key-letters { font-size: 8px; color: #444; letter-spacing: 1.5px; margin-top: 2px; }
+  .key.action { background: transparent; border: none; }
+  .key.action .key-num { font-size: 14px; color: #555; }
+
+  /* HOME SCREEN */
+  #home-screen {
+    background: linear-gradient(140deg, #0d0816 0%, #0a1020 50%, #0d1210 100%);
+    padding-bottom: 1rem;
+  }
+
+  .home-wallpaper-text {
+    text-align: center; padding: 1.5rem 0 0.5rem;
+    font-size: 11px; color: #333; letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .home-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 18px; padding: 1rem 1.2rem;
+  }
+
+  .app-icon {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    cursor: pointer;
+  }
+  .app-icon-img {
+    width: 54px; height: 54px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    position: relative; transition: transform 0.1s;
+  }
+  .app-icon-img:active { transform: scale(0.9); }
+  .app-icon-label { font-size: 10px; color: #aaa; text-align: center; }
+
+  .badge {
+    position: absolute; top: -4px; right: -4px;
+    background: #e74c3c; border-radius: 10px;
+    font-size: 9px; color: white; padding: 1px 5px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* APP VIEWS */
+  .app-view { display: none; flex: 1; flex-direction: column; }
+  .app-view.open { display: flex; }
+
+  .app-topbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.07);
+  }
+  .back-btn {
+    font-size: 20px; color: #666; cursor: pointer; padding: 2px 6px;
+    border: none; background: transparent;
+  }
+  .back-btn:hover { color: #aaa; }
+  .app-title { font-size: 15px; color: #ccc; font-weight: 400; }
+
+  /* MESSAGES APP */
+  #app-messages {
+    background: #0a0a0a;
+  }
+  .msg-thread {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+  }
+  .msg-thread:hover { background: rgba(255,255,255,0.03); }
+  .msg-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .msg-info { flex: 1; min-width: 0; }
+  .msg-sender { font-size: 13px; color: #ddd; }
+  .msg-preview { font-size: 12px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .msg-time { font-size: 10px; color: #444; }
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #3498db; }
+
+  /* PHOTOS APP */
+  #app-photos { background: #0a0a0a; }
+  .photo-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    padding: 8px;
+  }
+  .photo-cell {
+    aspect-ratio: 1; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .photo-cell:hover { opacity: 0.8; }
+
+  /* NOTES APP */
+  #app-notes { background: #0a0a0a; }
+  .note-item {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+  }
+  .note-title { font-size: 13px; color: #ddd; }
+  .note-preview { font-size: 11px; color: #555; margin-top: 3px; }
+
+  /* CONTACTS */
+  #app-contacts { background: #0a0a0a; }
+  .contact-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.05);
+  }
+  .contact-letter { font-size: 16px; color: #333; width: 28px; }
+
+  /* DOCK */
+  .dock {
+    display: flex; justify-content: center; gap: 20px;
+    padding: 10px; margin: 0 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 22px;
+    border: 0.5px solid rgba(255,255,255,0.08);
+    margin-top: auto;
+  }
+  .dock-icon {
+    width: 52px; height: 52px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; cursor: pointer; transition: transform 0.1s;
+    position: relative;
+  }
+  .dock-icon:active { transform: scale(0.88); }
+
+  /* shake animation */
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* swipe hint */
+  .swipe-hint {
+    font-size: 11px; color: #333; text-align: center;
+    padding: 6px 0 0; letter-spacing: 1px;
+  }
+</style>
+
+<div id="phone">
+  <div class="notch"></div>
+  <div class="status-bar">
+    <span id="clock-status">22:47</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <!-- LOCK SCREEN -->
+  <div id="lock-screen" class="screen active">
+    <div class="lock-time" id="lock-time">22:47</div>
+    <div class="lock-date" id="lock-date">Monday, May 4</div>
+
+    <div class="lock-notif">
+      <div class="notif-icon">💬</div>
+      <div class="notif-text">
+        <div class="notif-app">Messages</div>
+        <div class="notif-msg">Are you there? Please answer 😰</div>
+      </div>
+      <div class="notif-time">now</div>
+    </div>
+    <div class="lock-notif">
+      <div class="notif-icon">📸</div>
+      <div class="notif-text">
+        <div class="notif-app">Photos</div>
+        <div class="notif-msg">Shared album "Last night" updated</div>
+      </div>
+      <div class="notif-time">1h</div>
+    </div>
+    <div class="lock-notif">
+      <div class="notif-icon">⚠️</div>
+      <div class="notif-text">
+        <div class="notif-app">Unknown</div>
+        <div class="notif-msg">I know what you did.</div>
+      </div>
+      <div class="notif-time">3h</div>
+    </div>
+
+    <div style="margin-top:auto; padding-bottom: 1.5rem; text-align:center;">
+      <div style="font-size:12px;color:#444;letter-spacing:2px;margin-bottom:8px;">SWIPE UP TO UNLOCK</div>
+      <div style="font-size:22px;color:#333;cursor:pointer;" id="swipe-btn" onclick="showKeypad()">↑</div>
+    </div>
+  </div>
+
+  <!-- KEYPAD SCREEN -->
+  <div id="keypad-screen" class="screen">
+    <div class="keypad-prompt">Enter Passcode</div>
+    <div class="keypad-dots" id="dots">
+      <div class="dot" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+    </div>
+    <div class="keypad-grid" id="keypad-grid">
+      <div class="key" onclick="pressKey('1')"><span class="key-num">1</span><span class="key-letters"></span></div>
+      <div class="key" onclick="pressKey('2')"><span class="key-num">2</span><span class="key-letters">ABC</span></div>
+      <div class="key" onclick="pressKey('3')"><span class="key-num">3</span><span class="key-letters">DEF</span></div>
+      <div class="key" onclick="pressKey('4')"><span class="key-num">4</span><span class="key-letters">GHI</span></div>
+      <div class="key" onclick="pressKey('5')"><span class="key-num">5</span><span class="key-letters">JKL</span></div>
+      <div class="key" onclick="pressKey('6')"><span class="key-num">6</span><span class="key-letters">MNO</span></div>
+      <div class="key" onclick="pressKey('7')"><span class="key-num">7</span><span class="key-letters">PQRS</span></div>
+      <div class="key" onclick="pressKey('8')"><span class="key-num">8</span><span class="key-letters">TUV</span></div>
+      <div class="key" onclick="pressKey('9')"><span class="key-num">9</span><span class="key-letters">WXYZ</span></div>
+      <div class="key action" onclick="showLock()"><span class="key-num">✕</span></div>
+      <div class="key" onclick="pressKey('0')"><span class="key-num">0</span><span class="key-letters"></span></div>
+      <div class="key action" onclick="deleteKey()"><span class="key-num">⌫</span></div>
+    </div>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div id="home-screen" class="screen">
+    <div class="home-wallpaper-text">▲ SIMULACRA ▲</div>
+    <div class="home-grid">
+      <div class="app-icon" onclick="openApp('messages')">
+        <div class="app-icon-img" style="background:#1a3a5c;">💬<span class="badge">3</span></div>
+        <div class="app-icon-label">Messages</div>
+      </div>
+      <div class="app-icon" onclick="openApp('photos')">
+        <div class="app-icon-img" style="background:#1a2a1a;">📷<span class="badge">1</span></div>
+        <div class="app-icon-label">Photos</div>
+      </div>
+      <div class="app-icon" onclick="openApp('notes')">
+        <div class="app-icon-img" style="background:#2a2010;">📝</div>
+        <div class="app-icon-label">Notes</div>
+      </div>
+      <div class="app-icon" onclick="openApp('contacts')">
+        <div class="app-icon-img" style="background:#1f1028;">👤</div>
+        <div class="app-icon-label">Contacts</div>
+      </div>
+      <div class="app-icon" onclick="openApp('maps')">
+        <div class="app-icon-img" style="background:#0d1f1a;">🗺️</div>
+        <div class="app-icon-label">Maps</div>
+      </div>
+      <div class="app-icon" onclick="openApp('browser')">
+        <div class="app-icon-img" style="background:#141a28;">🌐</div>
+        <div class="app-icon-label">Browser</div>
+      </div>
+      <div class="app-icon" onclick="openApp('settings')">
+        <div class="app-icon-img" style="background:#1a1a1a;">⚙️</div>
+        <div class="app-icon-label">Settings</div>
+      </div>
+      <div class="app-icon" onclick="openApp('gallery')">
+        <div class="app-icon-img" style="background:#1e1428;">🎞️</div>
+        <div class="app-icon-label">Gallery</div>
+      </div>
+    </div>
+
+    <div style="padding: 0.5rem 1.2rem 0.5rem;">
+      <div style="background:rgba(255,255,255,0.04);border-radius:12px;border:0.5px solid rgba(255,255,255,0.07);padding:12px 14px;">
+        <div style="font-size:10px;color:#444;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">Recent Activity</div>
+        <div style="font-size:12px;color:#666;">😱 Unknown number called 4x at 3:14 AM</div>
+        <div style="font-size:12px;color:#555;margin-top:4px;">📍 Last location: Riverside Park, 02:58 AM</div>
+        <div style="font-size:12px;color:#c0392b;margin-top:4px;">⚠️ Deleted: "evidence.mp4"</div>
+      </div>
+    </div>
+
+    <div class="dock">
+      <div class="dock-icon" style="background:#1a3a5c;" onclick="openApp('messages')">💬</div>
+      <div class="dock-icon" style="background:#1a2a1a;" onclick="openApp('photos')">📷</div>
+      <div class="dock-icon" style="background:#2a0d0d;" onclick="openApp('dialer')">📞</div>
+      <div class="dock-icon" style="background:#1f1028;" onclick="openApp('contacts')">👤</div>
+    </div>
+  </div>
+
+  <!-- APP: MESSAGES -->
+  <div id="app-messages" class="app-view">
+    <div class="app-topbar">
+      <button class="back-btn" onclick="closeApp()">‹</button>
+      <span class="app-title">Messages</span>
+    </div>
+    <div class="msg-thread">
+      <div class="msg-avatar" style="background:#1a3a3a;">😰</div>
+      <div class="msg-info">
+        <div class="msg-sender">Sarah</div>
+        <div class="msg-preview">Please answer me 😰😰 where are you???</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="msg-time">2m ago</div>
+        <div class="unread-dot"></div>
+      </div>
+    </div>
+    <div class="msg-thread">
+      <div class="msg-avatar" style="background:#2a1010;">😈</div>
+      <div class="msg-info">
+        <div class="msg-sender">Unknown</div>
+        <div class="msg-preview">Tick tock. 🕐 You have until midnight.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+        <div class="msg-time">3h</div>
+        <div class="unread-dot"></div>
+      </div>
+    </div>
+    <div class="msg-thread">
+      <div class="msg-avatar" style="background:#1a1a3a;">🤔</div>
+      <div class="msg-info">
+        <div class="msg-sender">Alex</div>
+        <div class="msg-preview">Did you talk to her? 🙁 I'm worried...</div>
+      </div>
+      <div class="msg-time">5h</div>
+    </div>
+    <div class="msg-thread">
+      <div class="msg-avatar" style="background:#1a2a10;">😊</div>
+      <div class="msg-info">
+        <div class="msg-sender">Mom</div>
+        <div class="msg-preview">Dinner is ready! ❤️ Call me when you can 🥰</div>
+      </div>
+      <div class="msg-time">8h</div>
+    </div>
+    <div style="padding:1rem;text-align:center;margin-top:auto;">
+      <div style="font-size:11px;color:#333;letter-spacing:1px;">— END OF THREADS —</div>
+    </div>
+  </div>
+
+  <!-- APP: PHOTOS -->
+  <div id="app-photos" class="app-view">
+    <div class="app-topbar">
+      <button class="back-btn" onclick="closeApp()">‹</button>
+      <span class="app-title">Photos</span>
+    </div>
+    <div style="padding:8px;font-size:10px;color:#444;letter-spacing:2px;text-transform:uppercase;">Last Night</div>
+    <div class="photo-grid">
+      <div class="photo-cell" style="background:#0d1a10;">🌲</div>
+      <div class="photo-cell" style="background:#1a1010;">🌃</div>
+      <div class="photo-cell" style="background:#0a0a1a;">🌉</div>
+      <div class="photo-cell" style="background:#10100a;">🌙</div>
+      <div class="photo-cell" style="background:#1a0a0a;">🕯️</div>
+      <div class="photo-cell" style="background:#0a1010;opacity:0.5;">🚫<div style="font-size:10px;color:#555;margin-top:2px;">deleted</div></div>
+    </div>
+    <div style="padding:8px;font-size:10px;color:#444;letter-spacing:2px;text-transform:uppercase;">Recently Deleted</div>
+    <div class="photo-grid">
+      <div class="photo-cell" style="background:#1a0a0a;opacity:0.4;">🎥<div style="font-size:9px;color:#c0392b;">evidence.mp4</div></div>
+      <div class="photo-cell" style="background:#0d0d0d;opacity:0.4;">📄<div style="font-size:9px;color:#666;">note.jpg</div></div>
+    </div>
+  </div>
+
+  <!-- APP: NOTES -->
+  <div id="app-notes" class="app-view">
+    <div class="app-topbar">
+      <button class="back-btn" onclick="closeApp()">‹</button>
+      <span class="app-title">Notes</span>
+    </div>
+    <div class="note-item">
+      <div class="note-title">🔴 DO NOT TRUST HIM</div>
+      <div class="note-preview">He was there. I saw him at the park before—</div>
+    </div>
+    <div class="note-item">
+      <div class="note-title">😅 Things to buy</div>
+      <div class="note-preview">milk, eggs, bread, flashlight batteries...</div>
+    </div>
+    <div class="note-item">
+      <div class="note-title">📋 Meeting notes - Tuesday</div>
+      <div class="note-preview">Quarterly review, talk to Marcus about the—</div>
+    </div>
+    <div class="note-item" style="opacity:0.4;">
+      <div class="note-title" style="color:#555;">🗑️ [Deleted note]</div>
+      <div class="note-preview">Content unavailable</div>
+    </div>
+  </div>
+
+  <!-- APP: CONTACTS -->
+  <div id="app-contacts" class="app-view">
+    <div class="app-topbar">
+      <button class="back-btn" onclick="closeApp()">‹</button>
+      <span class="app-title">Contacts</span>
+    </div>
+    <div class="contact-item">
+      <div class="msg-avatar" style="background:#1a2a3a;width:40px;height:40px;font-size:18px;flex-shrink:0;">😊</div>
+      <div><div style="font-size:13px;color:#ddd;">Alex Mercer</div><div style="font-size:11px;color:#555;">+1 (555) 0192</div></div>
+    </div>
+    <div class="contact-item">
+      <div class="msg-avatar" style="background:#2a1a1a;width:40px;height:40px;font-size:18px;flex-shrink:0;">❤️</div>
+      <div><div style="font-size:13px;color:#ddd;">Mom</div><div style="font-size:11px;color:#555;">+1 (555) 0104</div></div>
+    </div>
+    <div class="contact-item">
+      <div class="msg-avatar" style="background:#1a3a1a;width:40px;height:40px;font-size:18px;flex-shrink:0;">😰</div>
+      <div><div style="font-size:13px;color:#ddd;">Sarah</div><div style="font-size:11px;color:#555;">+1 (555) 0337</div></div>
+    </div>
+    <div class="contact-item">
+      <div class="msg-avatar" style="background:#2a0a0a;width:40px;height:40px;font-size:18px;flex-shrink:0;">❓</div>
+      <div><div style="font-size:13px;color:#c0392b;">Unknown</div><div style="font-size:11px;color:#555;">+1 (?) ???-????</div></div>
+    </div>
+  </div>
+
+  <!-- APP: GENERIC -->
+  <div id="app-generic" class="app-view">
+    <div class="app-topbar">
+      <button class="back-btn" onclick="closeApp()">‹</button>
+      <span class="app-title" id="generic-title">App</span>
+    </div>
+    <div id="generic-content" style="padding:2rem;text-align:center;color:#444;font-size:13px;">
+    </div>
+  </div>
+</div>
+
+<script>
+const CODE = '7698';
+let entered = '';
+let currentApp = null;
+
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const t = h+':'+m;
+  const el = document.getElementById('lock-time');
+  const se = document.getElementById('clock-status');
+  if(el) el.textContent = t;
+  if(se) se.textContent = t;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const d = document.getElementById('lock-date');
+  if(d) d.textContent = days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate();
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showLock() { entered=''; showScreen('lock-screen'); updateDots(); }
+function showKeypad() { entered=''; showScreen('keypad-screen'); updateDots(); }
+
+function updateDots() {
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('d'+i);
+    d.classList.remove('filled','error');
+    if(i<entered.length) d.classList.add('filled');
+  }
+}
+
+function pressKey(k) {
+  if(entered.length>=4) return;
+  entered+=k;
+  updateDots();
+  if(entered.length===4) {
+    setTimeout(()=>{
+      if(entered===CODE) {
+        showScreen('home-screen');
+      } else {
+        document.querySelectorAll('.dot').forEach(d=>{d.classList.add('error');d.classList.remove('filled');});
+        const grid=document.getElementById('keypad-grid');
+        grid.classList.add('shake');
+        setTimeout(()=>{grid.classList.remove('shake');entered='';updateDots();},500);
+      }
+    },100);
+  }
+}
+
+function deleteKey() {
+  if(entered.length>0) { entered=entered.slice(0,-1); updateDots(); }
+}
+
+const genericContent = {
+  maps: { title:'Maps', icon:'🗺️', text:'📍 Last known route...<br><br><span style="color:#c0392b;">⚠️ Riverside Park — 2:58 AM</span><br><br>No recent searches.' },
+  browser: { title:'Browser', icon:'🌐', text:'🔍 Recent searches:<br><br><span style="color:#c0392b;">"how to permanently delete files"</span><br>"Riverside Park hours"<br>"who is Marcus Hale"<br><span style="color:#555;">[History cleared at 3:01 AM]</span>' },
+  settings: { title:'Settings', icon:'⚙️', text:'🔒 Screen lock: Active<br>📍 Location: Off<br>🔔 Notifications: On<br><br><span style="color:#555;font-size:11px;">Last backup: Never</span>' },
+  gallery: { title:'Gallery', icon:'🎞️', text:'🎥 Videos:<br><br><span style="color:#555;text-decoration:line-through;">evidence.mp4 — deleted</span><br>birthday_2024.mov<br>vacation_clips.mp4' },
+  dialer: { title:'Phone', icon:'📞', text:'📋 Recent calls:<br><br><span style="color:#c0392b;">Unknown ×4 — 3:14 AM</span><br>Sarah — 11:48 PM<br>Alex — 8:20 PM<br>Mom — 6:15 PM' },
+};
+
+function openApp(name) {
+  currentApp = name;
+  const specific = document.getElementById('app-'+name);
+  if(specific) {
+    document.querySelectorAll('.app-view').forEach(a=>a.classList.remove('open'));
+    specific.classList.add('open');
+    showScreen('home-screen');
+    document.getElementById('home-screen').style.display='none';
+    specific.style.display='flex';
+    specific.style.flexDirection='column';
+    specific.style.flex='1';
+    specific.style.background='#0a0a0a';
+    const phone = document.getElementById('phone');
+    phone.style.background='#0a0a0a';
+  } else if(genericContent[name]) {
+    const g = genericContent[name];
+    document.getElementById('generic-title').textContent = g.icon+' '+g.title;
+    document.getElementById('generic-content').innerHTML = g.text;
+    openApp2('app-generic');
+  }
+}
+
+function openApp2(id) {
+  document.querySelectorAll('.app-view').forEach(a=>{a.classList.remove('open');a.style.display='none';});
+  const app = document.getElementById(id);
+  app.style.display='flex';
+  app.style.flexDirection='column';
+  app.style.flex='1';
+  app.style.background='#0a0a0a';
+  document.getElementById('home-screen').style.display='none';
+  document.getElementById('phone').style.background='#0a0a0a';
+}
+
+function closeApp() {
+  document.querySelectorAll('.app-view').forEach(a=>{a.classList.remove('open');a.style.display='none';});
+  document.getElementById('home-screen').style.display='flex';
+  document.getElementById('phone').style.background='linear-gradient(140deg, #0d0816 0%, #0a1020 50%, #0d1210 100%)';
+  currentApp=null;
+}
+
+document.addEventListener('keydown', e => {
+  const ks = document.getElementById('keypad-screen');
+  if(ks && ks.classList.contains('active')) {
+    if(e.key>='0'&&e.key<='9') pressKey(e.key);
+    else if(e.key==='Backspace') deleteKey();
+  }
+});
+</script>
